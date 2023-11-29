@@ -83,12 +83,26 @@ def random_puzzle():
     unsolved_list = random.choice([puzzle1, puzzle2, puzzle3, puzzle4, puzzle5, puzzle6, puzzle7])
 
     # showing random puzzle
-    unsolved_str = '\n'.join(' '.join(str(x) for x in row) for row in unsolved_list)
-    unsolved_lab = tk.Label(bot_frame, text=unsolved_str, font=('Arial', 18))
+    outer_str = ''
+    for count_row, row in enumerate(unsolved_list):
+        inner_str = ''
+        for count_col, x in enumerate(row):
+            if count_col in [3, 6]:
+                inner_str += f' :  {x if x != 0 else "  "} '
+            else:
+                inner_str += f' {x if x != 0 else "  "} '
+        if count_row in [3, 6]:
+            outer_str += '\n ..  ..  ..     ..  ..  ..     ..  ..  .. \n' + inner_str
+        else:
+            outer_str += '\n' + inner_str
+    unsolved_str = outer_str + '\n'
+
+    # unsolved_str = '\n'.join(' '.join(str(x) for x in row) for row in unsolved_list)
+    unsolved_lab = tk.Label(bot_frame, text=unsolved_str, font=('Arial', 14))
     unsolved_lab.grid(row=0, column=0)
 
     # button which caused passing unsolved puzzle to solving function
-    solve_btn = tk.Button(bot_frame, text="Solve this puzzle", width=20, height=1, font=('Arial', 18),
+    solve_btn = tk.Button(bot_frame, text="Solve this puzzle", width=22, font=('Arial', 16),
                           command=lambda: solve_puzzle(unsolved_list))
     solve_btn.grid(row=1, column=0, padx=5, pady=5)
 
@@ -106,17 +120,35 @@ def own_puzzle():
     # 9x9 grid of entry boxes inserted into 2d list
     outer_list_entry = []
     for r in range(9):
+        if r in [0, 1, 2]:
+            r_pos = r
+        elif r in [3, 4, 5]:
+            r_pos = r + 1
+        else:
+            r_pos = r + 2
         inner_list_entry = []
         for c in range(9):
-            box_entry = tk.Entry(bot_frame, width=3)
-            box_entry.grid(row=r, column=c, pady=3)
+            if c in [0, 1, 2]:
+                c_pos = c
+            elif c in [3, 4, 5]:
+                c_pos = c + 1
+            else:
+                c_pos = c + 2
+            box_entry = tk.Entry(bot_frame, width=3, justify='center', font=('Arial', 10))
+            box_entry.grid(row=r_pos, column=c_pos, padx=3, pady=3)
             inner_list_entry.append(box_entry)
         outer_list_entry.append(inner_list_entry)
 
+    # gaps between 3x3 grid of entry boxes
+    for r in (3, 7):
+        for c in (3, 7):
+            space_label = tk.Label(bot_frame, text=" . ")
+            space_label.grid(row=r, column=c)
+
     # button which caused passing users inputs to checking function
-    check_btn = tk.Button(bot_frame, text="Check and save your puzzle", width=25, font=('Arial', 18),
+    check_btn = tk.Button(bot_frame, text="Check and save your puzzle", width=22, font=('Arial', 16),
                           command=lambda: check_puzzle(outer_list_entry))
-    check_btn.grid(row=9, column=0, columnspan=9, padx=5, pady=5)
+    check_btn.grid(row=11, column=0, columnspan=11, padx=5, pady=5)
 
 
 def check_puzzle(outer_list_entry: list):
@@ -127,9 +159,9 @@ def check_puzzle(outer_list_entry: list):
     """
 
     # button which caused passing unsolved puzzle to solving function, setting it to normal state
-    solve_btn = tk.Button(bot_frame, text="Solve this puzzle", width=25, height=1, font=('Arial', 18),
+    solve_btn = tk.Button(bot_frame, text="Solve this puzzle", width=22, font=('Arial', 16),
                           command=lambda: solve_puzzle(unsolved_list))
-    solve_btn.grid(row=10, column=0, columnspan=9, padx=5, pady=5)
+    solve_btn.grid(row=12, column=0, columnspan=11, padx=5, pady=5)
     solve_btn['state'] = tk.NORMAL
 
     # checking correction of single input, saving puzzle if correct input, message and solving button in disable state
@@ -270,11 +302,25 @@ def solve_puzzle(unsolved_list: list):
 
     # solution printing and converting into 2d list
     # print(f"Puzzle solved:\n{grid}") ###
-    solved_list = list(grid)   # why not: solved_list = grid.tolist() ? as np array: solved_list = grid also works
-    solved_str = '\n'.join(' '.join(str(x) for x in row) for row in solved_list)
-    print(solved_str)
-    solved_lab = tk.Label(bot_frame, text=solved_str, font=('Arial', 18))
-    solved_lab.grid(row=11, column=0, columnspan=9, padx=5, pady=5)
+    solved_list = grid
+    outer_str = ''
+    for count_row, row in enumerate(solved_list):
+        inner_str = ''
+        for count_col, x in enumerate(row):
+            if count_col in [3, 6]:
+                inner_str += f' :  {x if x != 0 else "  "} '
+            else:
+                inner_str += f' {x if x != 0 else "  "} '
+        if count_row in [3, 6]:
+            outer_str += '\n ..  ..  ..     ..  ..  ..     ..  ..  .. \n' + inner_str
+        else:
+            outer_str += '\n' + inner_str
+    solved_str = outer_str
+
+    # solved_list = list(grid)   # why not: solved_list = grid.tolist() ? as np array: solved_list = grid also works
+    # solved_str = '\n'.join(' '.join(str(x) for x in row) for row in solved_list)
+    solved_lab = tk.Label(bot_frame, text=solved_str, font=('Arial', 14))
+    solved_lab.grid(row=13, column=0, columnspan=11, padx=5, pady=5)
 
 
 def on_closing():
@@ -290,7 +336,7 @@ def on_closing():
 # tkinter window launch and main settings
 root = tk.Tk()
 
-root.geometry("600x700+500+50")
+root.geometry("525x750+500+0")
 root.title("Sudoku solver")
 
 top_frame = tk.Frame(root)
@@ -299,15 +345,15 @@ top_frame.grid(row=0, column=0)
 bot_frame = tk.Frame(root)
 bot_frame.grid(row=1, column=0)
 
-top_label = tk.Label(top_frame, text="What do you want to do?", font=('Arial', 18))
+top_label = tk.Label(top_frame, text="What do you want to do?", font=('Arial', 16))
 top_label.grid(row=0, column=0, columnspan=2, padx=5, pady=5)
 
 # definition of 2 first buttons in the window
-random_btn = tk.Button(top_frame, text="Show random puzzle", width=20, height=1, font=('Arial', 18),
+random_btn = tk.Button(top_frame, text="Show random puzzle", width=20, height=1, font=('Arial', 16),
                        command=random_puzzle)
 random_btn.grid(row=1, column=0, padx=5, pady=5)
 
-own_btn = tk.Button(top_frame, text="Input your puzzle", width=20, height=1, font=('Arial', 18), command=own_puzzle)
+own_btn = tk.Button(top_frame, text="Input your puzzle", width=20, height=1, font=('Arial', 16), command=own_puzzle)
 own_btn.grid(row=1, column=1, padx=5, pady=5)
 
 # action during exit
